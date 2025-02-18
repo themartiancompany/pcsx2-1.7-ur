@@ -43,8 +43,10 @@ _git="true"
 _pkg=pcsx2
 _Pkg="PCSX2"
 pkgname="${_pkg}"
-pkgver=2.2
-_commit="7bc5427908a0e2985bd354446e4bfeeedd4cd45b"
+pkgver="1.7.4592"
+_commit="b6923f49b159303bd3a2281021d22cdb6b8ea308"
+# pkgver="2.2"
+#_commit="2d5faa627ff54f3fb2a69a43286181bee071a1c3"
 pkgrel=1
 pkgdesc='A Sony PlayStation 2 emulator'
 arch=(
@@ -80,25 +82,34 @@ depends=(
   'qt6-base'
   'qt6-svg'
   'sdl2'
-  'shaderc-non-semantic-debug'
+  # new now-removed dependency
+  # 'shaderc-non-semantic-debug'
   'soundtouch'
   'wayland'
   'xz'
   'zlib'
 )
+# this specific version dependencies
+_depends+=(
+  'libasound.so'
+  'libfmt.so'
+  'libsamplerate.so'
+  'libzip.so'
+)
 makedepends=(
   'clang'
-  'ccmake'
-  'cextra-cmake-modules'
-  'cgit'
-  'clibpipewire'
-  'clibpulse'
-  'clld'
-  'cllvm'
-  'cninja'
-  'cp7zip'
-  'cqt6-tools'
-  'cqt6-wayland'
+  'cmake'
+  # new dependency not currently needed
+  # 'extra-cmake-modules'
+  # new dependency
+  # 'libpipewire'
+  'libpulse'
+  'lld'
+  'llvm'
+  'ninja'
+  'p7zip'
+  'qt6-tools'
+  'qt6-wayland'
 )
 optdepends=(
   'qt6-wayland: Wayland support'
@@ -113,6 +124,9 @@ _http="https://github.com"
 _ns="${_Pkg}"
 _url="${_http}/${_ns}/${_pkg}"
 if [[ "${_git}" == "true" ]]; then
+  makedepends+=(
+    "git"
+  )
   source=(
     "git+${_url}.git#tag=${_tag}"
     "git+${_http}/${_ns}/${_pkg}_patches.git"
@@ -125,12 +139,28 @@ if [[ "${_git}" == "true" ]]; then
     "git+${_http}/fastfloat/fast_float.git"
     "vulkan-headers::git+${_http}/KhronosGroup/Vulkan-Headers.git"
   )
+  # This version extra sources
+  source+=(
+    "git+${_http}/KhronosGroup/glslang.git"
+    "xz-pcsx2::git+${_http}/${_ns}/xz.git"
+    "git+${_http}/nih-at/libzip.git"
+    "git+${_http}/facebook/zstd.git"
+    "git+${_http}/RetroAchievements/rcheevos.git"
+  )
   b2sums=(
     '4e7df739987b26a0af09bbc807355eca2f7c3d7df671abbcdba50325f449dfa2c6db2bb63c093af93e934a3ff00e55407ad77918823afb60992b39ce8dfbc3c6'
     'SKIP'
     'SKIP'
     'SKIP'
     'SKIP'
+    'SKIP'
+    'SKIP'
+    'SKIP'
+    'SKIP'
+    'SKIP'
+  )
+  # This version extra sums
+  b2sums+=(
     'SKIP'
     'SKIP'
     'SKIP'
@@ -171,6 +201,11 @@ prepare() {
     "fmt::3rdparty/fmt/fmt"
     "rapidyaml::3rdparty/rapidyaml/rapidyaml"
     "vulkan-headers::3rdparty/vulkan-headers"
+    # Extra submodules for this version
+    "libchdr::3rdparty/libchdr/libchdr"
+    "libzip::3rdparty/libzip/libzip"
+    "zstd::3rdparty/zstd/zstd"
+    "rcheevos::3rdparty/rcheevos/rcheevos"
   )
   # must be done this way due to recursive submodules
   for _submodule \
