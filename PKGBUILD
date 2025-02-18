@@ -34,6 +34,12 @@
 _os="$( \
   uname \
     -o)"
+_clang="true"
+if [[ "${_clang}" == "true" ]]; then
+  _cc="clang"
+  _cxx="clang++"
+  _ld="lld"
+fi
 if [[ "${_os}" == "GNU/Linux" ]]; then
   _libc="glibc"
 elif [[ "${_os}" == "Android" ]]; then
@@ -97,14 +103,14 @@ _depends+=(
   'libzip.so'
 )
 makedepends=(
-  'clang'
+  "${_cc}"
   'cmake'
   # new dependency not currently needed
   # 'extra-cmake-modules'
   # new dependency
   # 'libpipewire'
   'libpulse'
-  'lld'
+  "${_ld}"
   'llvm'
   'ninja'
   'p7zip'
@@ -247,7 +253,16 @@ pkgver() {
 
 build() {
   local \
-    _cmake_opts=()
+    _cmake_opts=() \
+    _cxxflags=()
+  _cxxflags=(
+    $CXXFLAGS
+  )
+  if [[ "${_clang}" == "true" ]]; then
+    _cxxflags+=(
+      -Wp,-D_FORTIFY_SOURCE=0
+    )
+  fi
   _cmake_opts+=(
     -S
       "${pkgname}"
@@ -255,17 +270,18 @@ build() {
       "build"
     -G
       "Ninja"
-    -DCMAKE_C_COMPILER="clang"
-    -DCMAKE_CXX_COMPILER="clang++"
-    -DCMAKE_EXE_LINKER_FLAGS_INIT="-fuse-ld=lld"
-    -DCMAKE_MODULE_LINKER_FLAGS_INIT="-fuse-ld=lld"
-    -DCMAKE_SHARED_LINKER_FLAGS_INIT="-fuse-ld=lld"
+    -DCMAKE_C_COMPILER="${_cc}"
+    -DCMAKE_CXX_COMPILER="${_cxx}"
+    -DCMAKE_EXE_LINKER_FLAGS_INIT="-fuse-ld=${_ld}"
+    -DCMAKE_MODULE_LINKER_FLAGS_INIT="-fuse-ld=${_ld}"
+    -DCMAKE_SHARED_LINKER_FLAGS_INIT="-fuse-ld=${_ld}"
     -DCMAKE_INTERPROCEDURAL_OPTIMIZATION="ON"
     -DCMAKE_BUILD_TYPE="Release"
     -DX11_API="ON"
     -DWAYLAND_API="ON"
     -DENABLE_SETCAP="OFF"
     -DDISABLE_ADVANCE_SIMD="TRUE"
+    -D
     -DCMAKE_INSTALL_PREFIX="/usr"
   )
   # 7zip the patches
@@ -278,6 +294,7 @@ build() {
     "patches/."
   popd
   # see .github/workflows/scripts/linux/generate-cmake-qt.sh
+  CXXFLAGS="${_cxxflags[*]}"
   cmake \
     "${_cmake_opts[@]}"
   ninja \
