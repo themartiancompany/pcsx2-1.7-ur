@@ -35,15 +35,18 @@ _os="$( \
   uname \
     -o)"
 _clang="true"
+_avx="false"
 if [[ "${_clang}" == "true" ]]; then
   _cc="clang"
   _cxx="clang++"
   _ld="lld"
 fi
+_wayland="true"
 if [[ "${_os}" == "GNU/Linux" ]]; then
   _libc="glibc"
 elif [[ "${_os}" == "Android" ]]; then
   _libc="ndk-sysroot"
+  _wayland="false"
 fi
 _git="true"
 _pkg=pcsx2
@@ -91,12 +94,19 @@ depends=(
   # new now-removed dependency
   # 'shaderc-non-semantic-debug'
   'soundtouch'
-  'wayland'
   'xz'
   'zlib'
 )
+if [[ "${_wayland}" == "true" ]]; then
+  depends+=(
+    'wayland'
+  )
+  makedepends+=(
+    'qt6-wayland'
+  )
+fi
 # this specific version dependencies
-_depends+=(
+depends+=(
   'libasound.so'
   'libfmt.so'
   'libsamplerate.so'
@@ -115,7 +125,6 @@ makedepends=(
   'ninja'
   'p7zip'
   'qt6-tools'
-  'qt6-wayland'
 )
 optdepends=(
   'qt6-wayland: Wayland support'
@@ -254,7 +263,9 @@ pkgver() {
 build() {
   local \
     _cmake_opts=() \
-    _cxxflags=()
+    _cxxflags=() \
+    _wayland_api \
+    _avx_disabled
   _cxxflags=(
     $CXXFLAGS
   )
@@ -262,6 +273,16 @@ build() {
     _cxxflags+=(
       -Wp,-D_FORTIFY_SOURCE=0
     )
+  fi
+  if [[ "${_wayland}" == "true" ]]; then
+    _wayland_api="ON"
+  elif [[ "${_wayland}" == "false" ]]; then
+    _wayland_api="OFF"
+  fi
+  if [[ "${_avx}" == "true" ]]; then
+    _avx_disabled="TRUE"
+  elif [[ "${_avx}" == "false" ]]; then
+    _avx_disabled="FALSE"
   fi
   _cmake_opts+=(
     -S
@@ -278,10 +299,9 @@ build() {
     -DCMAKE_INTERPROCEDURAL_OPTIMIZATION="ON"
     -DCMAKE_BUILD_TYPE="Release"
     -DX11_API="ON"
-    -DWAYLAND_API="ON"
+    -DWAYLAND_API="${_wayland_api}"
     -DENABLE_SETCAP="OFF"
-    -DDISABLE_ADVANCE_SIMD="TRUE"
-    -D
+    -DDISABLE_ADVANCE_SIMD="${_avx_disabled}"
     -DCMAKE_INSTALL_PREFIX="/usr"
   )
   # 7zip the patches
@@ -294,9 +314,10 @@ build() {
     "patches/."
   popd
   # see .github/workflows/scripts/linux/generate-cmake-qt.sh
-  CXXFLAGS="${_cxxflags[*]}"
+  CXXFLAGS="${_cxxflags[*]}" \
   cmake \
     "${_cmake_opts[@]}"
+  CXXFLAGS="${_cxxflags[*]}" \
   ninja \
     -C "build" \
     -v
