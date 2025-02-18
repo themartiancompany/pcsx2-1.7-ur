@@ -141,6 +141,7 @@ if [[ "${_git}" == "true" ]]; then
   )
   # This version extra sources
   source+=(
+    "git+${_http}/rtissera/libchdr.git"
     "git+${_http}/KhronosGroup/glslang.git"
     "xz-pcsx2::git+${_http}/${_ns}/xz.git"
     "git+${_http}/nih-at/libzip.git"
@@ -148,7 +149,7 @@ if [[ "${_git}" == "true" ]]; then
     "git+${_http}/RetroAchievements/rcheevos.git"
   )
   b2sums=(
-    '4e7df739987b26a0af09bbc807355eca2f7c3d7df671abbcdba50325f449dfa2c6db2bb63c093af93e934a3ff00e55407ad77918823afb60992b39ce8dfbc3c6'
+    'SKIP'
     'SKIP'
     'SKIP'
     'SKIP'
