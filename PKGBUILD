@@ -116,6 +116,7 @@ optdepends=(
   'libpipewire: Pipewire support'
   'libpulse: PulseAudio support'
 )
+_tag_name="commit"
 _tag="${_commit}"
 options=(
   !lto
@@ -128,7 +129,7 @@ if [[ "${_git}" == "true" ]]; then
     "git"
   )
   source=(
-    "git+${_url}.git#tag=${_tag}"
+    "git+${_url}.git#${_tag_name}=${_tag}"
     "git+${_http}/${_ns}/${_pkg}_patches.git"
     "git+${_http}/google/googletest.git"
     "git+${_http}/fmtlib/fmt.git"
@@ -162,6 +163,7 @@ if [[ "${_git}" == "true" ]]; then
   )
   # This version extra sums
   b2sums+=(
+    'SKIP'
     'SKIP'
     'SKIP'
     'SKIP'
@@ -203,6 +205,8 @@ prepare() {
     "rapidyaml::3rdparty/rapidyaml/rapidyaml"
     "vulkan-headers::3rdparty/vulkan-headers"
     # Extra submodules for this version
+    "xz-pcsx2::3rdparty/xz/xz"
+    "glslang::3rdparty/glslang/glslang"
     "libchdr::3rdparty/libchdr/libchdr"
     "libzip::3rdparty/libzip/libzip"
     "zstd::3rdparty/zstd/zstd"
