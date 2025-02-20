@@ -289,23 +289,28 @@ build() {
     _fmt_libs \
     _cmake_include_dirs=() \
     _cmake_libs_dirs=() \
-    _cmake_cxx_flags=()
+    _cmake_cxx_flags=() \
+    _ldflags=()
   _ffmpeg_include="$( \
     _usr_get)/include/ffmpeg${_ffmpeg_ver}"
   _fmt_include="$( \
     _usr_get)/include/fmt${_fmt_ver}"
-  _ffmpeg_libs="-L$( \
+  _ffmpeg_libs="$( \
     _usr_get)/lib/ffmpeg${_ffmpeg_ver}"
-  _fmt_libs="-L$( \
+  _fmt_libs="$( \
     _usr_get)/lib/fmt${_fmt_ver}"
   # Cmake is damn weird
   _cmake_include_dirs+=(
     -I"${_ffmpeg_include}"
     -I"${_fmt_include}"
   )
+  _ldflags+=(
+    -L"${_fmt_libs}"
+    -lfmt
+  )
   _cmake_libs_dirs+=(
-    "${_ffmpeg_libs}"
-    "${_fmt_libs}"
+    -L"${_ffmpeg_libs}"
+    # -L"${_fmt_libs}"
   )
   _cmake_cxx_flags+=(
     "${_cmake_include_dirs[@]}"
@@ -370,6 +375,7 @@ build() {
   cmake \
     "${_cmake_opts[@]}"
   CXXFLAGS="${_cxxflags[*]}" \
+  LDFLAGS="${_ldflas[*]}" \
   ninja \
     -C "build" \
     -v
