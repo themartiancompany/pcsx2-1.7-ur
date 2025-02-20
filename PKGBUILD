@@ -51,9 +51,10 @@ fi
 _git="true"
 _pkg=pcsx2
 _Pkg="PCSX2"
-pkgname="${_pkg}"
+pkgname="${_pkg}-1.7"
 pkgver="1.7.4592"
 _commit="b6923f49b159303bd3a2281021d22cdb6b8ea308"
+_ffmpeg_ver="6.1"
 # pkgver="2.2"
 #_commit="2d5faa627ff54f3fb2a69a43286181bee071a1c3"
 pkgrel=1
@@ -76,7 +77,7 @@ license=(
   'LGPL3'
 )
 depends=(
-  "ffmpeg6.1"
+  "ffmpeg<7"
   "${_libc}"
   'libaio.so'
   'libgl'
@@ -130,6 +131,9 @@ optdepends=(
   'qt6-wayland: Wayland support'
   'libpipewire: Pipewire support'
   'libpulse: PulseAudio support'
+)
+provides+=(
+  "${_pkg}=${pkgver}"
 )
 _tag_name="commit"
 _tag="${_commit}"
@@ -316,7 +320,10 @@ build() {
     -DENABLE_SETCAP="OFF"
     -DDISABLE_ADVANCE_SIMD="${_avx_disabled}"
     -DCMAKE_INSTALL_PREFIX="/usr"
-    -DCMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES="$(_usr_get)/include/ffmpeg6.1"
+    -DCMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES="$(_usr_get)/include/ffmpeg${_ffmpeg_ver}"
+    -DCMAKE_CXX_FLAGS="-L$(_usr_get)/lib/ffmpeg${_ffmpeg_ver}"
+    -DFFMPEG_INCLUDE_DIRS="$(_usr_get)/include/ffmpeg${_ffmpeg_ver}"
+    -DFFMPEG_LIBRARIES="$(_usr_get)/lib/ffmpeg${_ffmpeg_ver}"
   )
   # 7zip the patches
   pushd \
@@ -352,7 +359,7 @@ package() {
     "/dev/stdin" \
     "${pkgdir}/usr/bin/${_pkg}-qt" <<eof
 #!/usr/bin/env sh
-/opt/${_pkg}/${_pkg}-qt "\$@"
+/opt/${pkgname}/${_pkg}-qt "\$@"
 eof
   cd \
     "${pkgname}"
@@ -361,6 +368,10 @@ eof
     ".github/workflows/scripts/linux/${_pkg}-qt.desktop" \
     -t \
     "${pkgdir}/usr/share/applications/"
+  sed \
+    "s/Icon=${_Pkg}/Icon=${pkgname}/" \
+    -i \
+    "${pkgdir}/usr/share/applications/${_pkg}-qt.desktop"
   install \
     -Dm644 \
     "bin/resources/icons/AppIconLarge.png" \
