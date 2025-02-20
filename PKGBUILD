@@ -329,6 +329,7 @@ build() {
       -Wp,-D_FORTIFY_SOURCE=0
       -Wno-deprecated-declarations
       -Wl,"${_libfmt}"
+      "${_cmake_cxx_flags[@]}"
     )
   fi
   if [[ "${_wayland}" == "true" ]]; then
@@ -360,7 +361,7 @@ build() {
     -DENABLE_SETCAP="OFF"
     -DDISABLE_ADVANCE_SIMD="${_avx_disabled}"
     -DCMAKE_INSTALL_PREFIX="/usr"
-    -DCMAKE_CXX_FLAGS="${_cmake_cxx_flags[*]}"
+    -DCMAKE_CXX_FLAGS="${_cxxflags[*]}"
     -DFFMPEG_INCLUDE_DIRS="${_ffmpeg_include}"
     -DFFMPEG_LIBRARIES="${_ffmpeg_libs}"
   )
