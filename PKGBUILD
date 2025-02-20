@@ -55,7 +55,7 @@ pkgname="${_pkg}-1.7"
 pkgver="1.7.4592"
 _commit="b6923f49b159303bd3a2281021d22cdb6b8ea308"
 _ffmpeg_ver="6.1"
-_fmt_ver="10"
+_fmt_ver="8"
 # pkgver="2.2"
 #_commit="2d5faa627ff54f3fb2a69a43286181bee071a1c3"
 pkgrel=1
@@ -293,11 +293,11 @@ build() {
   _ffmpeg_include="$( \
     _usr_get)/include/ffmpeg${_ffmpeg_ver}"
   _fmt_include="$( \
-    _usr_get)/include/fmt10"
+    _usr_get)/include/fmt${_fmt_ver}"
   _ffmpeg_libs="-L$( \
     _usr_get)/lib/ffmpeg${_ffmpeg_ver}"
   _fmt_libs="-L$( \
-    _usr_get)/lib/fmt10"
+    _usr_get)/lib/fmt${_fmt_ver}"
   # Cmake is damn weird
   _cmake_include_dirs+=(
     -I"${_ffmpeg_include}"
