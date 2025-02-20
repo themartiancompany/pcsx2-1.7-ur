@@ -299,17 +299,22 @@ build() {
     _usr_get)/lib/ffmpeg${_ffmpeg_ver}"
   _fmt_libs="$( \
     _usr_get)/lib/fmt${_fmt_ver}"
+  _libfmt="${_fmt_libs}/libfmt.so"
   # Cmake is damn weird
   _cmake_include_dirs+=(
     -I"${_ffmpeg_include}"
     -I"${_fmt_include}"
   )
   _ldflags+=(
+    $LDFLAGS
+    -fuse-ld=${_ld}
+    -L"${_ffmpeg_libs}"
     -L"${_fmt_libs}"
     -lfmt
+    "${_libfmt}"
   )
   _cmake_libs_dirs+=(
-    -L"${_ffmpeg_libs}"
+    # -L"${_ffmpeg_libs}"
     # -L"${_fmt_libs}"
   )
   _cmake_cxx_flags+=(
@@ -323,6 +328,7 @@ build() {
     _cxxflags+=(
       -Wp,-D_FORTIFY_SOURCE=0
       -Wno-deprecated-declarations
+      -Wl,"${_libfmt}"
     )
   fi
   if [[ "${_wayland}" == "true" ]]; then
@@ -344,9 +350,9 @@ build() {
       "Ninja"
     -DCMAKE_C_COMPILER="${_cc}"
     -DCMAKE_CXX_COMPILER="${_cxx}"
-    -DCMAKE_EXE_LINKER_FLAGS_INIT="-fuse-ld=${_ld}"
-    -DCMAKE_MODULE_LINKER_FLAGS_INIT="-fuse-ld=${_ld}"
-    -DCMAKE_SHARED_LINKER_FLAGS_INIT="-fuse-ld=${_ld}"
+    -DCMAKE_EXE_LINKER_FLAGS_INIT="${_ldflags[*]}"
+    -DCMAKE_MODULE_LINKER_FLAGS_INIT="${_ldflags[*]}"
+    -DCMAKE_SHARED_LINKER_FLAGS_INIT="${_ldflags[*]}"
     -DCMAKE_INTERPROCEDURAL_OPTIMIZATION="ON"
     -DCMAKE_BUILD_TYPE="Release"
     -DX11_API="ON"
@@ -354,9 +360,6 @@ build() {
     -DENABLE_SETCAP="OFF"
     -DDISABLE_ADVANCE_SIMD="${_avx_disabled}"
     -DCMAKE_INSTALL_PREFIX="/usr"
-    # -DCMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES="${_cmake_include_dirs[*]}"
-    # -DCMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES="${_ffmpeg_include}"
-    # -DCMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES="${_fmt_include}"
     -DCMAKE_CXX_FLAGS="${_cmake_cxx_flags[*]}"
     -DFFMPEG_INCLUDE_DIRS="${_ffmpeg_include}"
     -DFFMPEG_LIBRARIES="${_ffmpeg_libs}"
@@ -372,10 +375,11 @@ build() {
   popd
   # see .github/workflows/scripts/linux/generate-cmake-qt.sh
   CXXFLAGS="${_cxxflags[*]}" \
+  LDFLAGS="${_ldflags[*]}" \
   cmake \
     "${_cmake_opts[@]}"
   CXXFLAGS="${_cxxflags[*]}" \
-  LDFLAGS="${_ldflas[*]}" \
+  LDFLAGS="${_ldflags[*]}" \
   ninja \
     -C "build" \
     -v
