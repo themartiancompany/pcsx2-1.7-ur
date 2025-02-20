@@ -286,7 +286,10 @@ build() {
     _ffmpeg_include \
     _ffmpeg_libs \
     _fmt_include \
-    _fmt_libs
+    _fmt_libs \
+    _cmake_include_dirs=() \
+    _cmake_libs_dirs=() \
+    _cmake_cxx_flags=()
   _ffmpeg_include="$( \
     _usr_get)/include/ffmpeg${_ffmpeg_ver}"
   _fmt_include="$( \
@@ -296,14 +299,17 @@ build() {
   _fmt_libs="-L$( \
     _usr_get)/lib/fmt10"
   # Cmake is damn weird
-  _cmake_include_dirs=(
-    "${_ffmpeg_include}"
-    -isystem
-      "${_fmt_include}"
+  _cmake_include_dirs+=(
+    -I"${_ffmpeg_include}"
+    -I"${_fmt_include}"
   )
-  _cmake_libs_dirs=(
+  _cmake_libs_dirs+=(
     "${_ffmpeg_libs}"
     "${_fmt_libs}"
+  )
+  _cmake_cxx_flags+=(
+    "${_cmake_include_dirs[@]}"
+    "${_cmake_libs_dirs[@]}"
   )
   _cxxflags=(
     $CXXFLAGS
@@ -343,8 +349,10 @@ build() {
     -DENABLE_SETCAP="OFF"
     -DDISABLE_ADVANCE_SIMD="${_avx_disabled}"
     -DCMAKE_INSTALL_PREFIX="/usr"
-    -DCMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES="${_cmake_include_dirs[*]}"
-    -DCMAKE_CXX_FLAGS="${_cmake_libs_dirs[*]}"
+    # -DCMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES="${_cmake_include_dirs[*]}"
+    # -DCMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES="${_ffmpeg_include}"
+    # -DCMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES="${_fmt_include}"
+    -DCMAKE_CXX_FLAGS="${_cmake_cxx_flags[*]}"
     -DFFMPEG_INCLUDE_DIRS="${_ffmpeg_include}"
     -DFFMPEG_LIBRARIES="${_ffmpeg_libs}"
   )
