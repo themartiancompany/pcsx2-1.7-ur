@@ -297,9 +297,9 @@ build() {
     _usr_get)/lib/fmt10"
   # Cmake is damn weird
   _cmake_include_dirs=(
-    "\"${_ffmpeg_include}\""
+    "${_ffmpeg_include}"
     -isystem
-      "\"${_fmt_include}\""
+      "${_fmt_include}"
   )
   _cmake_libs_dirs=(
     "${_ffmpeg_libs}"
