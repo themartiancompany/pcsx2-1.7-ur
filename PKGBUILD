@@ -55,6 +55,7 @@ pkgname="${_pkg}-1.7"
 pkgver="1.7.4592"
 _commit="b6923f49b159303bd3a2281021d22cdb6b8ea308"
 _ffmpeg_ver="6.1"
+_fmt_ver="10"
 # pkgver="2.2"
 #_commit="2d5faa627ff54f3fb2a69a43286181bee071a1c3"
 pkgrel=1
@@ -109,7 +110,7 @@ fi
 # this specific version dependencies
 depends+=(
   'libasound.so'
-  'libfmt.so'
+  "libfmt.so=${_fmt_ver}"
   'libsamplerate.so'
   'libzip.so'
 )
@@ -281,7 +282,27 @@ build() {
     _cmake_opts=() \
     _cxxflags=() \
     _wayland_api \
-    _avx_disabled
+    _avx_disabled \
+    _ffmpeg_include \
+    _ffmpeg_libs \
+    _fmt_include \
+    _fmt_libs
+  _ffmpeg_include="$( \
+    _usr_get)/include/ffmpeg${_ffmpeg_ver}"
+  _fmt_include="$( \
+    _usr_get)/include/fmt10"
+  _ffmpeg_libs="-L$( \
+    _usr_get)/lib/ffmpeg${_ffmpeg_ver}"
+  _fmt_libs="-L$( \
+    _usr_get)/lib/fmt10"
+  _cmake_include_dirs=(
+    "${_ffmpeg_include}"
+    "${_fmt_include}"
+  )
+  _cmake_libs_dirs=(
+    "${_ffmpeg_libs}"
+    "${_fmt_libs}"
+  )
   _cxxflags=(
     $CXXFLAGS
   )
@@ -320,10 +341,13 @@ build() {
     -DENABLE_SETCAP="OFF"
     -DDISABLE_ADVANCE_SIMD="${_avx_disabled}"
     -DCMAKE_INSTALL_PREFIX="/usr"
-    -DCMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES="$(_usr_get)/include/ffmpeg${_ffmpeg_ver}"
-    -DCMAKE_CXX_FLAGS="-L$(_usr_get)/lib/ffmpeg${_ffmpeg_ver}"
-    -DFFMPEG_INCLUDE_DIRS="$(_usr_get)/include/ffmpeg${_ffmpeg_ver}"
-    -DFFMPEG_LIBRARIES="$(_usr_get)/lib/ffmpeg${_ffmpeg_ver}"
+    -DCMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES="$( \
+      IFS=","; \
+      echo \
+        "${_cmake_include_dirs[*]}")"
+    -DCMAKE_CXX_FLAGS="${_cmake_libs_dirs[*]}"
+    -DFFMPEG_INCLUDE_DIRS="${_ffmpeg_include}"
+    -DFFMPEG_LIBRARIES="${_ffmpeg_libs}"
   )
   # 7zip the patches
   pushd \
