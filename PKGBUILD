@@ -76,7 +76,7 @@ license=(
   'LGPL3'
 )
 depends=(
-  'ffmpeg'
+  "ffmpeg6.1"
   "${_libc}"
   'libaio.so'
   'libgl'
@@ -260,6 +260,18 @@ pkgver() {
       's/^v//'
 }
 
+_usr_get() {
+  local \
+    _bin
+  _bin="$( \
+    dirname \
+      "$(command \
+           -v \
+	   "env")")"
+  dirname \
+    "${_bin}"
+}
+
 build() {
   local \
     _cmake_opts=() \
@@ -272,6 +284,7 @@ build() {
   if [[ "${_clang}" == "true" ]]; then
     _cxxflags+=(
       -Wp,-D_FORTIFY_SOURCE=0
+      -Wno-deprecated-declarations
     )
   fi
   if [[ "${_wayland}" == "true" ]]; then
@@ -280,9 +293,9 @@ build() {
     _wayland_api="OFF"
   fi
   if [[ "${_avx}" == "true" ]]; then
-    _avx_disabled="TRUE"
-  elif [[ "${_avx}" == "false" ]]; then
     _avx_disabled="FALSE"
+  elif [[ "${_avx}" == "false" ]]; then
+    _avx_disabled="TRUE"
   fi
   _cmake_opts+=(
     -S
@@ -303,6 +316,7 @@ build() {
     -DENABLE_SETCAP="OFF"
     -DDISABLE_ADVANCE_SIMD="${_avx_disabled}"
     -DCMAKE_INSTALL_PREFIX="/usr"
+    -DCMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES="$(_usr_get)/include/ffmpeg6.1"
   )
   # 7zip the patches
   pushd \
