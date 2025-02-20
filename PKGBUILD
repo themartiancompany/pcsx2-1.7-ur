@@ -257,7 +257,7 @@ prepare() {
 
 pkgver() {
   git \
-    -C "${pkgname}" \
+    -C "${_pkg}" \
     describe \
       --tags | \
     sed \
@@ -303,7 +303,7 @@ build() {
   fi
   _cmake_opts+=(
     -S
-      "${pkgname}"
+      "${_pkg}"
     -B
       "build"
     -G
@@ -362,7 +362,7 @@ package() {
 /opt/${pkgname}/${_pkg}-qt "\$@"
 eof
   cd \
-    "${pkgname}"
+    "${_pkg}"
   install \
     -Dm644 \
     ".github/workflows/scripts/linux/${_pkg}-qt.desktop" \
