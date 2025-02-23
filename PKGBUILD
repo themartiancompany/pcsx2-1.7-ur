@@ -411,6 +411,10 @@ eof
     -t \
     "${pkgdir}/usr/share/applications/"
   sed \
+    "s/Name=${_Pkg}/Name=${_Pkg} (${pkgver})/" \
+    -i \
+    "${pkgdir}/usr/share/applications/${_pkg}-qt.desktop"
+  sed \
     "s/Icon=${_Pkg}/Icon=${pkgname}/" \
     -i \
     "${pkgdir}/usr/share/applications/${_pkg}-qt.desktop"
