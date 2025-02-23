@@ -51,8 +51,9 @@ fi
 _git="true"
 _pkg=pcsx2
 _Pkg="PCSX2"
-pkgname="${_pkg}-1.7"
-pkgver="1.7.4592"
+_majver="1.7"
+pkgname="${_pkg}-${_majver}"
+pkgver="${_majver}.4592"
 _commit="b6923f49b159303bd3a2281021d22cdb6b8ea308"
 _ffmpeg_ver="6.1"
 _fmt_ver="8"
@@ -411,7 +412,7 @@ eof
     -t \
     "${pkgdir}/usr/share/applications/"
   sed \
-    "s/Name=${_Pkg}/Name=${_Pkg} (${pkgver})/" \
+    "s/Name=${_Pkg}/Name=${_Pkg} (${_majver})/" \
     -i \
     "${pkgdir}/usr/share/applications/${_pkg}-qt.desktop"
   sed \
